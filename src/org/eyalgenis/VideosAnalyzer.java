@@ -1,11 +1,16 @@
 package org.eyalgenis;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class VideosAnalyzer implements Runnable {
     ArrayList<Video> videos;
     private static final double diff = 0.5;
     boolean synced;
+    JSONObject outputJson;
 
     @Override
     public void run() {
@@ -26,7 +31,11 @@ public class VideosAnalyzer implements Runnable {
             }
         }
 
-
+        try {
+            createJSON();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
 
     }
 
@@ -64,5 +73,22 @@ public class VideosAnalyzer implements Runnable {
 
     public void setSynced(boolean synced) {
         this.synced = synced;
+    }
+
+    public void createJSON() throws JSONException {
+
+        JSONArray varr = new JSONArray();
+        for(Video v : videos) {
+            varr.put(v.createVideoJSON());
+        }
+        JSONObject json = new JSONObject()
+                .put("all_videos_freeze_frame_synced", synced)
+                .put("videos", varr);
+
+        outputJson = json;
+    }
+
+    public JSONObject getOutputJson() {
+        return outputJson;
     }
 }

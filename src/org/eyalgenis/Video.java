@@ -1,5 +1,9 @@
 package org.eyalgenis;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 
@@ -63,5 +67,19 @@ public class Video extends VideoPeriod {
 
     public void setValidPrecentage(double validPrecentage) {
         this.validPrecentage = validPrecentage;
+    }
+
+    public JSONObject createVideoJSON() throws JSONException {
+        JSONArray pjson = new JSONArray();
+        for(VideoPeriod p : periods) {
+            pjson.put(p.createJSON());
+        }
+
+        JSONObject json = new JSONObject()
+                .put("longest_valid_period", longest)
+                .put("valid_video_percentage", validPrecentage)
+                .put("valid_periods", pjson);
+
+        return json;
     }
 }

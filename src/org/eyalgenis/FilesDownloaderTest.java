@@ -16,6 +16,6 @@ public class FilesDownloaderTest {
         FilesDownloader downloader = new FilesDownloader();
         downloader.setUrls(urls);
 
-        downloader.downloadFilesFromURLs();
+        downloader.run();
     }
 }

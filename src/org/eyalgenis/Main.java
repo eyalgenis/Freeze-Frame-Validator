@@ -1,5 +1,8 @@
 package org.eyalgenis;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.*;
 import java.util.ArrayList;
 
@@ -20,5 +23,8 @@ public class Main {
         VideosAnalyzer analyzer = new VideosAnalyzer();
         analyzer.setVideos(videos);
         analyzer.run();
+
+        String outputString = analyzer.getOutputJson().toString();
+        System.out.println(outputString);
     }
 }

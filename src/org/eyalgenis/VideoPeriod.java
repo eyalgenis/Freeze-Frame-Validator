@@ -1,5 +1,9 @@
 package org.eyalgenis;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class VideoPeriod {
     double start;
     double end;
@@ -42,5 +46,9 @@ public class VideoPeriod {
         } else {
             return false;
         }
+    }
+
+    public JSONArray createJSON() throws JSONException {
+        return new JSONArray().put(start).put(end);
     }
 }

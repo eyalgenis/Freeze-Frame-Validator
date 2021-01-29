@@ -5,10 +5,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
 
-public class FilesDownloader {
+public class FilesDownloader implements Runnable {
     String[] urls;
 
-    public void downloadFilesFromURLs() {
+    @Override
+    public void run() {
         for(String url : this.urls) {
 
             String fileName = getFileNameFromURL(url);
