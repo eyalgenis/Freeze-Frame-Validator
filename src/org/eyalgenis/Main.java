@@ -1,9 +1,5 @@
 package org.eyalgenis;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.*;
 import java.util.ArrayList;
 
 public class Main {
@@ -15,7 +11,6 @@ public class Main {
         downloader.run();
 
         FreezeDetector detector = new FreezeDetector();
-        detector.setPath(System.getProperty("user.dir"));
         detector.run();
 
         ArrayList<Video> videos = detector.getValidVideos();

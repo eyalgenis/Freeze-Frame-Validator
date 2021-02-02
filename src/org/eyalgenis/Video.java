@@ -13,19 +13,23 @@ public class Video extends VideoPeriod {
     double validTime;
     double validPrecentage;
 
+    public Video() {
+        this.start = 0;
+    }
+
     public void createValidVideoFromPoints(ArrayList<Double> points) {
-        LinkedList<VideoPeriod> sections = new LinkedList<>();
+        this.periods = new LinkedList<>();
 
         int i=0;
         while(i < points.size()) {
-            VideoPeriod s = new VideoPeriod();
-            s.setStart(points.get(i));
+            VideoPeriod period = new VideoPeriod();
+            period.setStart(points.get(i));
             if (i++ < points.size()) {
-                s.setEnd(points.get(i));
-                sections.add(s);
+                period.setEnd(points.get(i));
+                periods.add(period);
                 i++;
             } else {
-                s.setEnd(end);
+                period.setEnd(end);
             }
         }
     }

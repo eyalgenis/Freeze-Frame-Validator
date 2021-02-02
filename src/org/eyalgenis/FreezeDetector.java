@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.ArrayList;
 
 public class FreezeDetector implements Runnable {
-    String path;
+
     File[] videoFiles;
     ArrayList<Video> validVideos = new ArrayList<>();
 
@@ -14,41 +14,49 @@ public class FreezeDetector implements Runnable {
         videoFiles = getMp4Files();
         for (File f : this.videoFiles) {
 
-            String inputFileName = f.toString();
-            String outputFileName = inputFileName + "_out";
+            String inputFile = f.toString();
+            String output = null;
 
-            String command = "ffmpeg -i " + inputFileName + " -lavfi freezedetect=\"n=0.003\" " + outputFileName;
-
-            String output = executeCommand(command);
-            System.out.println(output);
+            try {
+                output = executeCommand(inputFile).toString();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
             ArrayList<Double> points = getPointsFromFilter(output);
-            double duration = getVideoDuration(inputFileName);
             Video video = new Video();
-            video.setStart(0);
-            video.setEnd(duration);
+            video.setEnd(points.get(points.size()-1));
             video.createValidVideoFromPoints(points);
             validVideos.add(video);
         }
     }
 
     private ArrayList<Double> getPointsFromFilter(String output) {
+
         String[] lines = output.split(System.getProperty("line.separator"));
         ArrayList<Double> points = new ArrayList<>();
+        points.add(0.0);
+        double duration = 0;
 
-        int i=0, j=1;
+        int i=0;
         while(i < lines.length) {
 
-            if(lines[i].contains("lavfi.freezedetect.freeze_")) {
+            if(lines[i].contains("Duration:")) {
+                String value = lines[i].split(":")[3].split(",")[0];
+                duration = Double.valueOf(value);
+            }
+
+            if(lines[i].contains("lavfi.freezedetect.freeze_start")
+                    || lines[i].contains("lavfi.freezedetect.freeze_end")) {
                 String value = lines[i].split(": ")[1].split("kbits")[0];
-                double start = Double.valueOf(value);
-                points.add(j, start);
-                j++;
+                double point = Double.valueOf(value);
+                points.add(point);
             }
 
             i++;
         }
 
+        points.add(duration);
         return points;
     }
 
@@ -65,34 +73,56 @@ public class FreezeDetector implements Runnable {
     }
 
 
-    public static String executeCommand(String command) {
-        StringBuffer output = new StringBuffer();
-        Process p;
+    public static OutputStream executeCommand(String inputFile) throws IOException {
+
+        String outputFile = inputFile + "_out.mp4";
+        String command = "ffmpeg -i " + inputFile + " -lavfi freezedetect=n=0.003 " + outputFile;
+        System.out.println("Launching command: "+command);
+        ProcessBuilder pb = new ProcessBuilder("ffmpeg", "-i", inputFile, "-lavfi","freezedetect=\"n=0.003\"", outputFile);
+        Process proc = pb.start();
+
+        PipeStream out = new PipeStream(proc .getInputStream());
+        PipeStream err = new PipeStream(proc .getErrorStream());
+        out.start();
+        err.start();
+
         try {
-            p = Runtime.getRuntime().exec(command);
-            p.waitFor();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line = "";
-            while ((line = reader.readLine())!= null) {
-                output.append(line + "\n");
-            }
-        } catch (Exception e) {
+            proc .waitFor();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        return output.toString();
-    }
 
-
-    public static void main(String[] args) {
-        FreezeDetector fd = new FreezeDetector();
-        fd.run();
-    }
-
-    public void setPath(String path) {
-        this.path = path;
+        System.out.println("Exit value is: "+proc .exitValue());
+        return (err.getOs() != null ? err.getOs() : out.getOs());
     }
 
     public ArrayList<Video> getValidVideos() {
         return validVideos;
+    }
+
+    private static class PipeStream extends Thread {
+        InputStream is;
+        OutputStream os;
+
+        public PipeStream(InputStream is) {
+            this.is = is;
+            this.os = new ByteArrayOutputStream();
+        }
+
+        public void run() {
+            byte[] buffer=new byte[1024];
+            int len;
+            try {
+                while ((len=is.read(buffer))>=0){
+                    os.write(buffer,0,len);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        public OutputStream getOs() {
+            return os;
+        }
     }
 }
