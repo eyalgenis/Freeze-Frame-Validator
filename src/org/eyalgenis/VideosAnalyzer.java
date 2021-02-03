@@ -42,7 +42,7 @@ public class VideosAnalyzer implements Runnable {
     private void calcValidPrecentage(Video v) {
         double totalTime = v.calcDuration();
         double validPrecentage = v.getValidTime() / totalTime;
-        v.setValidPrecentage(validPrecentage);
+        v.setValidPercentage(validPrecentage);
     }
 
     private void calcLongestPeriodAndValidTime(Video v) {
@@ -59,22 +59,6 @@ public class VideosAnalyzer implements Runnable {
         v.setValidTime(time);
     }
 
-    public ArrayList<Video> getVideos() {
-        return videos;
-    }
-
-    public void setVideos(ArrayList<Video> videos) {
-        this.videos = videos;
-    }
-
-    public boolean isSynced() {
-        return synced;
-    }
-
-    public void setSynced(boolean synced) {
-        this.synced = synced;
-    }
-
     public void createJSON() throws JSONException {
 
         JSONArray varr = new JSONArray();
@@ -86,6 +70,11 @@ public class VideosAnalyzer implements Runnable {
                 .put("videos", varr);
 
         outputJson = json;
+    }
+
+
+    public void setVideos(ArrayList<Video> videos) {
+        this.videos = videos;
     }
 
     public JSONObject getOutputJson() {

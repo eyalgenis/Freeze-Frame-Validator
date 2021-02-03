@@ -2,6 +2,9 @@ package org.eyalgenis;
 
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FilenameFilter;
+
 import static org.junit.Assert.*;
 
 public class FilesDownloaderTest {
@@ -15,7 +18,21 @@ public class FilesDownloaderTest {
 
         FilesDownloader downloader = new FilesDownloader();
         downloader.setUrls(urls);
-
         downloader.run();
+
+        File[] files = getMp4Files();
+        assertEquals(urls.length, files.length);
+    }
+
+    public File[] getMp4Files() {
+        File dir = new File(".");
+        File[] files = dir.listFiles(new FilenameFilter() {
+            @Override
+            public boolean accept(File dir, String name) {
+                return name.endsWith(".mp4");
+            }
+        });
+
+        return files;
     }
 }

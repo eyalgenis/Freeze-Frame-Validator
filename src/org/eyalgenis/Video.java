@@ -8,10 +8,11 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Video extends VideoPeriod {
+
     LinkedList<VideoPeriod> periods;
     double longest;
     double validTime;
-    double validPrecentage;
+    double validPercentage;
 
     public Video() {
         this.start = 0;
@@ -34,23 +35,32 @@ public class Video extends VideoPeriod {
         }
     }
 
-    public LinkedList<VideoPeriod> getPeriods() {
-        return periods;
-    }
-
     public boolean compareVideo(Video v, double diff) {
         int i=0;
         LinkedList<VideoPeriod> periods2 = v.getPeriods();
+
+        if(periods.size() != periods2.size()) return false;
         while(i < periods2.size()) {
             if(!periods.get(i).comparePeriod(periods2.get(i), diff)) {
                 return false;
             }
+            i++;
         }
         return true;
     }
 
-    public double getLongest() {
-        return longest;
+    public JSONObject createVideoJSON() throws JSONException {
+        JSONArray pjson = new JSONArray();
+        for(VideoPeriod p : periods) {
+            pjson.put(p.createJSON());
+        }
+
+        JSONObject json = new JSONObject()
+                .put("longest_valid_period", longest)
+                .put("valid_video_percentage", validPercentage)
+                .put("valid_periods", pjson);
+
+        return json;
     }
 
     public void setLongest(double longest) {
@@ -65,25 +75,16 @@ public class Video extends VideoPeriod {
         this.validTime = validTime;
     }
 
-    public double getValidPrecentage() {
-        return validPrecentage;
+    public void setValidPercentage(double validPercentage) {
+        this.validPercentage = validPercentage;
     }
 
-    public void setValidPrecentage(double validPrecentage) {
-        this.validPrecentage = validPrecentage;
+    public void setPeriods(LinkedList<VideoPeriod> periods) {
+        this.periods = periods;
     }
 
-    public JSONObject createVideoJSON() throws JSONException {
-        JSONArray pjson = new JSONArray();
-        for(VideoPeriod p : periods) {
-            pjson.put(p.createJSON());
-        }
-
-        JSONObject json = new JSONObject()
-                .put("longest_valid_period", longest)
-                .put("valid_video_percentage", validPrecentage)
-                .put("valid_periods", pjson);
-
-        return json;
+    public LinkedList<VideoPeriod> getPeriods() {
+        return periods;
     }
+
 }
